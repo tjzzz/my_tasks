@@ -1,0 +1,229 @@
+# igraph 常用方法
+
+
+## fun: 地图展示
+```{r}
+library('REmap')
+data_map = read.delim("./data/2001.all", header = F)
+colnames(data_map) <- c('city1', 'city2', 'count')
+
+ind =data_map$count > 2
+ind =data_map$count > 10
+ind=1:42
+#df<-data.frame(get_geo_position(as.vector(sudu2[,1])))
+###
+
+#data_map = head(data_map)
+remapB(title = "专利转移地图 2001",
+       color = 'blue',
+       markLineData = data_map[ind,c(1,2)],
+       #markPointData = data_map$city2,
+      # markPointTheme = markPointControl( effect = F, symbolSize = data_map[ind, 3]/100),
+       markLineTheme = markLineControl(symbolSize = c(2,4),
+            effect = F,  # 设置是否加箭头动态展示
+            lineWidth = log(data_map[ind,3])/10,
+            lineType = 'solid',
+            color= 'blue') 
+)
+
+```
+
+## 一。统计基础的网络特征
+基础网络特征统计
+```{r}
+basic_stat <-function(g){
+  # 1.基础特征统计, 这些默认都是没有权重的
+  node_num = length(V(g))
+  edge_num = length(E(g))
+  density = edge_density(g)
+  chuandixing = transitivity(g)   #聚类系数
+  d = diameter(g)
+   # 计算有效直径，即两两之间距离distance中所有数据的90%的分位点
+  distance_matrix = distances(g)
+  distance_matrix[is.infinite(distance_matrix)]= 0
+  d_list = sort(distance_matrix)
+  d_list = d_list[d_list > 0]     # 把0也就是inf，无连接的部分去掉
+  effective_diameter = quantile(d_list, 0.9)
+  mean_path_d = mean_distance(g)
+  # out1 = c(node_num, edge_num, density, chuandixing, d, effective_diameter, mean_path_d)
+  
+  # 2.网络中心势统计: 度中心势，接近中心， 中介中心
+  g_degree_in = centr_degree(g, mode = 'in')$centralization
+  g_degree_out = centr_degree(g, mode = 'out')$centralization
+  g_col_in = centr_clo(g, mode = 'in')$centralization
+  g_col_out = centr_clo(g, mode = 'out')$centralization
+  g_betw = centr_betw(g)$centralization
+  out2 = c(g_degree_in, g_degree_out, g_col_in, g_col_out, g_betw)
+  #
+  out = c(node_num, edge_num, density, chuandixing, d, effective_diameter, mean_path_d,
+    g_degree_in, g_degree_out, g_col_in, g_col_out, g_betw)
+  
+  #as.data.frame(out)
+  out
+  
+}
+```
+
+
+## 二。社区发觉
+随机游走算法挖掘社群，并绘图
+```{r}
+
+find_community <- function(g){
+  community_out = walktrap.community(g, steps=15)
+  # group.org = communities(community_out)
+  xy = layout.fruchterman.reingold(g)
+  
+  membership = community_out$membership    # 分组情况
+  V(g)$member = membership
+  mem.col = rainbow(length(unique(membership)),alpha=0.5)
+  V(g)$color = mem.col[membership]
+  
+  #V(g)$size <- log(degree(g))/100    ##节点大小与点中心度成正比，中心度即与该点相连的点的总数
+  #E(g)$width <- E(g)$count
+  V(g)$label = NA    # 默认没有label，只筛选其中比较大的点显示label
+  V(g)[degree(g)>500]$label=V(g)[degree(g)>500]$name 
+  
+  #png("g2.png", width = 1000, height = 1000)
+  plot(g, layout = xy, 
+       vertex.size=1, 
+       vertex.color=V(g)$color, 
+       vertex.label.family='STKaiti',
+       arrow.size=0.1,
+       edge.arrow.size=0.05
+       )
+  # 其他参数 vertex.size, vertex.label, vertex.label.cex, edge.color
+  #dev.off()
+}
+
+
+plot23<-function(g, org.com){
+  xy = layout.fruchterman.reingold(g)
+  V(g)$sg = org.com$membership
+  V(g)$bte = betweenness(g, directed = F)
+  daxiao = 0.8*log(V(g)$bte+1)             ### 表示圈的大小
+  V(g)$label=NA
+  V(g)[daxiao>5]$label=V(g)[daxiao>5]$name      # 设置大小大于7的才显示名字
+  #V(g)[degree(g)>10]$label=V(g)[degree(g)>10]$name
+  V(g)$cex=0.7                               # 设置字的大小
+  #V(g)[bte>0.03]$cex=1
+  
+  V(g)$color = rainbow(max(V(g)$sg))[V(g)$sg]
+  png("test.png", width = 1000, height = 1000)
+  E(g)$width <- 0.1
+  plot(g, layout = xy,  vertex.size = daxiao/2, vertex.color = V(g)$color, 
+         vertex.label = V(g)$label, vertex.label.cex=V(g)$cex, edge.color = grey(0.5), edge.arrow.mode = "-",
+       )
+  dev.off()
+  
+}
+
+
+# 
+# E(g)$color=V(g)[name=ends(g,E(g))[,2]]$color #为edge的颜色赋值
+# 
+# V(g)[grep("1", V(g)$name)]$color=rgb(1,1,1,0.8) #为vertex的颜色赋值
+# 
+# plot(g,layout=layout.fruchterman.reingold, 
+#      vertex.size=1, 
+#      vertex.color= V(g)$color, 
+#      edge.width=0.3,
+#      edge.color = E(g)$color,
+#      vertex.frame.color=NA,
+#      arrow.size=0.1,
+#       vertex.label.family='STKaiti',
+#        arrow.size=0.1,
+#        edge.arrow.size=0.05
+#      )
+
+```
+
+
+
+## 三.节点分析 中心度统计
+找到关键节点
+
+* 中心度
+* 结构洞
+
+```{r}
+
+node_central_stat <- function(g, in_out){
+  degree(g, mode = in_out, normalized = T)
+  closeness(g, mode=in_out, normalized = T)
+  betweenness(g, normalized = T)
+  ## 节点： 结构洞
+  
+}
+```
+
+
+主函数，依次读取每年的转让数据
+```{r}
+library("igraph")
+setwd('/Users/zhengzhenzhen/Desktop/yezi_paper/6')
+
+all_out = NULL
+year_list = c(2001:2018)
+for(year in year_list){
+  file_name = paste0('./data/', year, '.all')
+  data = read.delim(file_name, header=F)
+  #data = read.delim('data.test', header = F)
+  
+  colnames(data) <- c('city1', 'city2', 'count')
+  gg= graph_from_data_frame(data, directed = T)
+  g<-simplify(gg,remove.multiple=FALSE,remove.loops=TRUE)
+  is.simple(g)
+  
+  # 1. 整体统计
+  tmp_out = basic_stat(g)
+  all_out = cbind(all_out, tmp_out)
+}
+colnames(all_out) = year_list
+row.names(all_out) = c('node_num', 'edge_num', 'density', 'chuandixing', 'd', 'effective_diameter',
+                       'mean_path_d', 'g_degree_in', 'g_degree_out', 'g_col_in', 'g_col_out', 'g_betw')
+
+write.csv(all_out, file = 'out_basic_stat.csv')
+```
+
+
+
+
+
+
+
+
+```{r old}
+
+
+library("igraph")
+
+plot1<-function(g, xy, year){
+  png(paste0(year, "g.png"), width = 1000, height = 1000)
+  
+  plot(g, layout = xy, vertex.size = 3, vertex.label = NA,
+      edge.color = grey(0.3), edge.arrow.mode = "-")
+  #plot(g, vertex.size = 3, vertex.label = NA,
+  #    edge.color = grey(0.3), edge.arrow.mode = "-")
+  dev.off()  
+}
+
+plot2<-function(g, org.com, xy, year){
+  V(g)$sg = org.com$membership
+  
+  V(g)$color = rainbow(max(V(g)$sg))[V(g)$sg]
+  png(paste0(year, "g2.png"), width = 1000, height = 1000)
+  #par(mar = c(0, 0, 0, 0))
+  #set.seed(14)
+  plot(g, layout = xy, vertex.size = 3, vertex.color = V(g)$color, 
+         vertex.label = NA, edge.color = grey(0.5), edge.arrow.mode = "-")
+  
+    
+  dev.off()
+  
+}
+
+```
+
+
+
