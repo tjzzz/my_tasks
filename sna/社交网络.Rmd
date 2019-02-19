@@ -148,13 +148,18 @@ plot23<-function(g, org.com){
 
 ```{r}
 
-node_central_stat <- function(g, in_out){
-  degree(g, mode = in_out, normalized = T)
-  closeness(g, mode=in_out, normalized = T)
-  betweenness(g, normalized = T)
+node_central_stat <- function(g, year){
+  in_degree = degree(g, mode = 'in', normalized = T)
+  out_degree = degree(g, mode = 'out', normalized = T)
+  in_close= closeness(g, mode = 'in', normalized = T)
+  out_close = closeness(g, mode = 'out', normalized = T)
+  bet = betweenness(g, normalized = T)
+  out = data.frame(in_degree, out_degree, in_close, out_close, bet)
+  write.table(out, paste0('node_central_stat/',year,'txt'), sep ='\t')
   ## 节点： 结构洞
   
 }
+```
 ```
 
 
@@ -186,44 +191,6 @@ row.names(all_out) = c('node_num', 'edge_num', 'density', 'chuandixing', 'd', 'e
 write.csv(all_out, file = 'out_basic_stat.csv')
 ```
 
-
-
-
-
-
-
-
-```{r old}
-
-
-library("igraph")
-
-plot1<-function(g, xy, year){
-  png(paste0(year, "g.png"), width = 1000, height = 1000)
-  
-  plot(g, layout = xy, vertex.size = 3, vertex.label = NA,
-      edge.color = grey(0.3), edge.arrow.mode = "-")
-  #plot(g, vertex.size = 3, vertex.label = NA,
-  #    edge.color = grey(0.3), edge.arrow.mode = "-")
-  dev.off()  
-}
-
-plot2<-function(g, org.com, xy, year){
-  V(g)$sg = org.com$membership
-  
-  V(g)$color = rainbow(max(V(g)$sg))[V(g)$sg]
-  png(paste0(year, "g2.png"), width = 1000, height = 1000)
-  #par(mar = c(0, 0, 0, 0))
-  #set.seed(14)
-  plot(g, layout = xy, vertex.size = 3, vertex.color = V(g)$color, 
-         vertex.label = NA, edge.color = grey(0.5), edge.arrow.mode = "-")
-  
-    
-  dev.off()
-  
-}
-
-```
 
 
 
