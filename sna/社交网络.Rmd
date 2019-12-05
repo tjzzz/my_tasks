@@ -192,5 +192,72 @@ write.csv(all_out, file = 'out_basic_stat.csv')
 ```
 
 
+```{r}
+### 4.4 patent3_计算描述统计
+setwd("~/Desktop/yezi_patent3/")
+
+# 均值、标准差、最大最小值、1990:1996；1997:2007；2008:2016；1990:2016
+
+#读数据:
+all_out = NULL
+year_list = c(1990:2016)
+n = length(year_list)
+for(year in year_list){
+  data <-read.table(paste0('output_model/', as.character(year)), header = TRUE, sep='\t',fileEncoding ='UTF-8')
+  all_out = rbind(all_out, data)
+}
+out_name = paste0('stat_', as.character(year_list[1]), '_', as.character(year_list[n]))
+#out = summary(all_out)
+
+new_data = all_out[, c(4:15, 19,20)]
+all_res = NULL
+for(i in 1:ncol(new_data)){
+  tmp_data = new_data[, i]
+  if(i == 12){
+    tmp_data= tmp_data[tmp_data !='-']
+    tmp_data = as.numeric(tmp_data)
+  }
+  tmp_res = c(min(tmp_data), max(tmp_data), median(tmp_data), mean(tmp_data), sd(tmp_data))
+  all_res = rbind(all_res, tmp_res)
+}
+
+row.names(all_res) = colnames(new_data)
+
+write.table(all_res, file = out_name, sep='\t', row.names= T)
+
+```
+
+
+
+
+```{r}
+library('gamlss')
+
+setwd("~/Desktop/yezi_patent3/")
+data <- read.table('./output_model/2014',sep ='\t',header = TRUE, stringsAsFactors=F)
+
+
+#data <- read.table('./output_year_merge/out_1997_2007',sep ='\t',header = TRUE, stringsAsFactors=F)
+
+
+data = data[data['same_province_flag']!='-',]
+data['same_province_flag'] = as.numeric(data[,'same_province_flag'])
+
+str(data)
+
+
+data=data[,c('pair_num', 'same_5', 'same_2', 'pair_hist_sum_5', 'pair_hist_sum_2', 'app1_num_noraml', 'app2_num_noraml', 'sd', 'same_province_flag', 'same_type_flag', 'distance')]
+
+zinb_test = gamlss(pair_num ~ same_5 + same_2 + pair_hist_sum_5 + pair_hist_sum_2 + app1_num_noraml+ app2_num_noraml + sd + same_province_flag + same_type_flag + distance,data=data,family=DPO)
+
+
+
+```
+
+
+
+
+
+
 
 
