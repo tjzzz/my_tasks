@@ -18,8 +18,6 @@ def cal_variation_coefficient(_list):
     """
     avg = np.mean(_list)
     var = np.std(_list)
-
-    print(_list)
     
     return var / avg
 

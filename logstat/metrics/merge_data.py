@@ -81,20 +81,17 @@ class MergeData(object):
             last_year = int(year) - 1
             last_key = str(last_year) + '\t' + col
             #
-            if last_key in yy_dict and key in control_dict and key in yy_dict:
+            if last_key in yy_dict and last_key in control_dict and key in yy_dict:
                 Yt = yy_dict[key]
                 yt_1 = yy_dict[last_key]
-                zz_control = control_dict[key]
-                ## 这两个需要计算concentration
+                zz_control = control_dict[last_key]
 
-                #paper_data = paper_dict[key]
-                #patent_data = patent_dict[key]
-
-                patent_3_dict = trans_data(patent_dict, 3, int(year))
-                patent_5_dict = trans_data(patent_dict, 5, int(year))
+                ## 计算concentration
+                patent_3_dict = trans_data(patent_dict, 3, int(last_year))
+                patent_5_dict = trans_data(patent_dict, 5, int(last_year))
                 
-                paper_3_dict = trans_data(paper_dict, 3, int(year))
-                paper_5_dict = trans_data(paper_dict, 5, int(year))
+                paper_3_dict = trans_data(paper_dict, 3, int(last_year))
+                paper_5_dict = trans_data(paper_dict, 5, int(last_year))
                 if col in patent_5_dict and col in paper_5_dict:
                     x_patent_3 = patent_3_dict[col]
                     x_patent_5 = patent_5_dict[col]
