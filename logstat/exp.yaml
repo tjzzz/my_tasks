@@ -1,0 +1,13 @@
+conf:
+    # 自定义
+    metric_dir: '/Users/zhengzhenzhen/Desktop/yezi/logstat/metrics/'
+    patent_dir: '/Users/zhengzhenzhen/zzz/zzz/项目tasks/yezi_paper/step2_clean_data/'
+
+    
+stream_data:
+    - YY    # Y 变量
+    - PatentIPC
+    - PaperCLC
+    - ControlVars
+    - MergeData
+   
