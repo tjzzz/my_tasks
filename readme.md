@@ -1,11 +1,6 @@
-# data_science
-data science study and combat
+# my tasks
 
+ 个人相关项目
 
-
-
-学习list
-
-http://www.huaxiaozhuan.com/
 
 
