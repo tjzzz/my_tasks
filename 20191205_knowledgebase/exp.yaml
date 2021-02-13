@@ -2,14 +2,18 @@ conf:
     start_dt: '2019-08-30'
     end_dt: '2019-08-30'
     # 自定义
-    metric_dir: '/Users/zhengzhenzhen/Desktop/github_data_science/logstat/metrics/'
+    metric_dir: '/Users/zhengzhenzhen/zzz/task_projects/logstat/metrics/'
     patent_dir: '/Users/zhengzhenzhen/zzz/zzz/项目tasks/yezi_paper/step2_clean_data/'
 
     
 stream_data:
-    - YY    # Y 变量
+    - Common: 'college_dir:college_list.txt'
+    - YY
     - PatentIPC
     - PaperCLC
     - ControlVars
-    #- MergeData
+    - MergeData
    
+## merge 英文发表的论文
+merge_english_202102:
+

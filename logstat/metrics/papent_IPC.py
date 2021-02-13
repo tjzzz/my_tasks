@@ -13,12 +13,12 @@ from tools import get_list
 		
 class PatentIPC(object):
 
-	def map(self, input):
+	def process(self, input):
 		"""
 		统计专利的合作数据：
 		year + univ IPC
 		"""
-		college_list = get_list('college_list.txt')
+		college_list = input['college_list']
 
 		if not os.path.exists('data.patent_IPC'):
 			os.system('cat data/data_patent_col/* > data.patent_IPC')

@@ -21,12 +21,13 @@ class YY(object):
 		'当前法律状态','专利有效性',	'首次公开日',	'授权公告日','专利类型', 
 		'主分类号','国民经济分类', '转让人', '受让人','转让执行日'] + ['生效日', 'p1', 'p2', 'a1', 'a2', 'code1', 'code2', 'pro1','city1', 'pro2', 'city2']
 
-	def map(self, input):
+	def process(self, input):
 		"""
 		统计专利的合作数据, 作为Y
 		year + univ + 和别人合作数
 		"""
-		college_list = get_list('college_list.txt')
+		college_dir = input['college_dir']
+		college_list = get_list(college_dir)
 
 		if not os.path.exists('data.patent_pair'):
 			os.system('cat ' + input['patent_dir'] +'/* > data.patent_pair')
@@ -51,5 +52,7 @@ class YY(object):
 				patent_dict[key] += 1
 
 
-		return {'yy_dict': patent_dict}
+		return {'yy_dict': patent_dict, 
+				'college_list': college_list
+				}
 	

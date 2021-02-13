@@ -10,7 +10,7 @@ import time
         
 class ControlVars(object):
 
-    def map(self, input):
+    def process(self, input):
         """
         控制变量
         """

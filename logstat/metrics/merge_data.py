@@ -62,7 +62,7 @@ def trans_data(patent_data, window, year):
 
 class MergeData(object):
 
-    def map(self, input):
+    def process(self, input):
         """
         控制变量
         """

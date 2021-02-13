@@ -10,7 +10,7 @@ import time
         
 class PaperCLC(object):
 
-    def map(self, input):
+    def process(self, input):
         """
         统计
         """
