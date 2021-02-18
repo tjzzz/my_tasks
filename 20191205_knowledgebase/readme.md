@@ -1,5 +1,42 @@
 
 
+## 2021-02 更新添加英文版数据
+
+- 更新college_list 为按照控制变量来的118个
+- 增加X: 深度、广度指标， Y改为合作占比统一量纲
+
+
+
+(1) 数据准备
+- 更新 PaperCLCWithEnglish
+- cal_RTA bug fix
+
+```
+## 准备数据
+ye -e exp.yaml -m merge_english_202102
+```
+
+
+
+
+
+(2)
+- add `run_model/`
+
+
+(3) 基础统计
+
+- X的相关系数矩阵
+- X，y的描述统计
+- 
+
+
+
+
+---
+## old
+
+
 1. patent_data 
 
 专利数据分为两部分:

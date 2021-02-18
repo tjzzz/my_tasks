@@ -33,10 +33,15 @@ class YY(object):
 			os.system('cat ' + input['patent_dir'] +'/* > data.patent_pair')
 
 		patent_dict = {}
+		ipc_hot_dict = {}
 		for line in open('data.patent_pair'):
 			items = line.strip().split('\t')
 			info = dict(zip(self.title_list, items))
 			
+			open_id = info['公开（公告）号']
+			patent_type = 'A'
+			if open_id.endswith('U'):
+				patent_type = 'U'
 			apply_year = info['申请日'][:4]
 			apply_person = info['申请人']
 
@@ -48,8 +53,21 @@ class YY(object):
 			for college in hit_college:
 				key = apply_year + '\t' + college
 				if key not in patent_dict:
-					patent_dict[key] = 0
-				patent_dict[key] += 1
+					patent_dict[key] = {'A': 0, 'U': 0}
+				patent_dict[key][patent_type] += 1
+			
+		# 	### 统计热门IPC类别
+		# 	if '2012'<= apply_year <= '2018':
+		# 		ipc = info['主分类号'][:3]
+		# 		if ipc not in ipc_hot_dict:
+		# 			ipc_hot_dict[ipc] = 0
+		# 		ipc_hot_dict[ipc] += 1
+		# ##
+		# ff = open('res_ipc_hot1.csv', 'w')
+		# for ipc in ipc_hot_dict:
+		# 	ff.write(ipc + '\t' + str(ipc_hot_dict[ipc]) + '\n')
+		# ff.close()
+
 
 
 		return {'yy_dict': patent_dict, 

@@ -1,0 +1,51 @@
+
+
+```{r}
+
+setwd("~/zzz/task_projects/20191205_knowledgebase")
+
+data = read.csv('final_res_with_english.csv', sep = '\t')
+
+## 数据转变
+data['ln_yt'] = log(data['yt'])
+data['ln_size'] = log(data['size'])
+data['ln_rnd'] = log(data['rnd'])
+
+data['dt'] = data['year'] - 2011
+
+colnames(data)
+```
+
+变量说明:
+
+- yt: 每年的合作数
+- yt_A: A型专利
+- yt_U: U型专利
+- patent_wide: 知识的广度，在分类中满足该分类下的论文/专利数超过5个的分类个数
+- patent_deep： 该学校在某个分类下的专利申请数/所有学校在该分类下的申请书作为该分类下的改学校的深度，然后所有深度计算平均值作为最终的深度度量
+
+- patent_top_rate: 该学校申请的类别中B,H,G三类的占比
+- match_distance: 每个学校的专利的分类的分布与论文的分类的分布，两个频率分布计算向量之间的距离
+
+
+```{r 验证泊松分布}
+##
+require(qcc)
+qcc.overdispersion.test(data$yt,type="poisson") 
+```
+
+```{r}
+library(MASS)
+
+ff = 'yt ~ patent1 + paper1  + ln_size +ln_rnd + patent_wide + patent_deep + paper_wide + paper_deep + match_distance + patent_top_rate + dt'
+# model_poisson = glm(formula = ff, data=data, family = poisson)
+
+model_nb <- glm.nb(formula = ff, data = data)
+
+summary(model_nb)
+```
+
+
+
+
+

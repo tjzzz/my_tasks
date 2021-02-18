@@ -12,8 +12,16 @@ stream_data:
     - PatentIPC
     - PaperCLC
     - ControlVars
-    - MergeData
+    - MergeData: 'out_dir:final_res.csv'
    
 ## merge 英文发表的论文
 merge_english_202102:
+    - Common: 'college_dir:college_list.txt'
+    - YY
+    - PatentIPC
+    - PaperCLCWithEnglish
+    - ControlVars
+    - MergeData: 'out_dir:final_res_with_english.csv'
 
+stats:
+    - BasicStats

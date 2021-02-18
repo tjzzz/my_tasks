@@ -24,6 +24,7 @@ class PatentIPC(object):
 			os.system('cat data/data_patent_col/* > data.patent_IPC')
 
 		patent_dict = {}
+		ipc_hot_dict = {}
 		for line in open('data.patent_IPC'):
 			items = line.strip().split('\t')
 			year = items[0]
@@ -47,6 +48,18 @@ class PatentIPC(object):
 				if IPC not in patent_dict[key]:
 					patent_dict[key][IPC] = 0
 				patent_dict[key][IPC] += 1
+			
+		# 	### 统计热门IPC类别
+		# 	if '2012'<= apply_year <= '2018':
+		# 		if IPC not in ipc_hot_dict:
+		# 			ipc_hot_dict[IPC] = 0
+		# 		ipc_hot_dict[IPC] += 1
+		# ###
+		# ff = open('res_ipc_hot2.csv', 'w')
+		# for ipc in ipc_hot_dict:
+		# 	ff.write(ipc + '\t' + str(ipc_hot_dict[ipc]) + '\n')
+		# ff.close()
+
 
 		return {'patent_dict': patent_dict}
 	
