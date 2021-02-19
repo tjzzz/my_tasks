@@ -16,7 +16,9 @@ def get_english_num():
 
 	english_dict = {}
 	english_data_dir = 'english_data/英文发表数据/'
-	for year in ['2012', '2013', '2014', '2015', '2016', '2017', '2018']:
+	year_list = list(range(2008, 2021))
+	year_list = [str(year) for year in year_list]
+	for year in year_list:
 		data_dir = english_data_dir + year + '年各高校数据'
 		for tmp_file in os.listdir(data_dir):
 			if not tmp_file.startswith(year):

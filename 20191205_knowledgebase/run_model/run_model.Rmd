@@ -34,13 +34,21 @@ require(qcc)
 qcc.overdispersion.test(data$yt,type="poisson") 
 ```
 
+
+```{r 过滤指定year的数据}
+start_year = '2009'
+end_year = '2017'
+
+data_filter = data[(data['year'] >= start_year & data['year'] <= end_year),]
+```
+
 ```{r}
 library(MASS)
 
 ff = 'yt ~ patent1 + paper1  + ln_size +ln_rnd + patent_wide + patent_deep + paper_wide + paper_deep + match_distance + patent_top_rate + dt'
 # model_poisson = glm(formula = ff, data=data, family = poisson)
 
-model_nb <- glm.nb(formula = ff, data = data)
+model_nb <- glm.nb(formula = ff, data = data_filter)
 
 summary(model_nb)
 ```

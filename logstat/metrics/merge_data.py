@@ -66,7 +66,7 @@ def cal_wide_deep(info, year_patent_dict):
     """
     _list = list(info.values())
     _list = np.array(_list)
-    wide = sum(_list >= 5)
+    wide = sum(_list > 0)
     ##
     _list = []
     for group in info:
@@ -167,7 +167,7 @@ class MergeData(object):
         ff.write('\t'.join(title_list) + '\n')
         for key in control_dict:
             year, col = key.split('\t')
-            if int(year) > 2017 or int(year) < 2012:
+            if int(year) > 2017 or int(year) < 2008:
                 continue
                 
             last_year = str(int(year) - 1)
