@@ -13,6 +13,9 @@ data['ln_rnd'] = log(data['rnd'])
 
 data['dt'] = data['year'] - 2011
 
+data['sd_size'] = scale(data['size'], center = TRUE, scale = TRUE)
+data['sd_rnd'] = scale(data['rnd'], center = TRUE, scale = TRUE)
+
 colnames(data)
 ```
 
@@ -53,7 +56,25 @@ model_nb <- glm.nb(formula = ff, data = data_filter)
 summary(model_nb)
 ```
 
+```{r}
+
+chisq.test(model_nb$fitted.values, model_nb$y)
+
+```
+
+```{r}
+## 数据基础统计
+mm_list = c('paper_wide', 'patent_wide', 'paper_deep', 'patent_deep', 'paper1', 'patent1', 'match_distance', 'sd_size', 'sd_rnd', 'patent_top_rate')
+
+for(mm in mm_list){
+  tmp = data_filter[, mm]
+  res = c(mean(tmp, na.rm = TRUE), sd(tmp, na.rm = TRUE), max(tmp, na.rm = TRUE), min(tmp, na.rm = TRUE))
+  print(res)
+}
 
 
+cor(data_filter[,mm_list], use="complete.obs")
+
+```
 
 
