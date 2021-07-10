@@ -60,10 +60,22 @@ def trans_data(patent_data, window, year):
     return rta_out
 
 
-def cal_wide_deep(info, year_patent_dict):
+def cal_wide_deep_history(patent_dict, year_patent_dict, col, last_year, window):
     """
     计算深度和广度
     """
+    year_list = list(range(last_year - window+1, last_year + 1))
+
+    info = {}
+    for year in year_list:
+        last_key = str(year) + '\t' + col
+        if last_key in patent_dict:
+            tmp_info = patent_dict[last_key]
+            for key in tmp_info:
+                if key not in info:
+                    info[key] = 0
+                info[key] += tmp_info[key]
+
     _list = list(info.values())
     _list = np.array(_list)
     wide = sum(_list > 0)
@@ -88,10 +100,30 @@ def cal_wide_deep(info, year_patent_dict):
 
     return [wide, deep, top_rate]
 
-def cal_distribution_similarity(patent_info, paper_info, IPC_CLC_mapping):
+def cal_distribution_similarity(patent_dict, paper_dict, tmp_col, last_year, window, IPC_CLC_mapping):
     """
     计算两个的匹配度
     """
+    patent_info = {}
+    paper_info = {}
+    year_list = list(range(last_year - window+1, last_year + 1))
+    for key in patent_dict:
+        year, col = key.split('\t')
+        if int(year) in year_list and col == tmp_col:
+            for group in patent_dict[key]:
+                if group not in patent_info:
+                    patent_info[group] = 0
+                patent_info[group] += patent_dict[key][group]
+    
+    for key2 in paper_dict:
+        year, col = key2.split('\t')
+        if int(year) in year_list and col == tmp_col:
+            for group in paper_dict[key2]:
+                if group not in paper_info:
+                    paper_info[group] = 0
+                paper_info[group] += paper_dict[key2][group]
+
+    ########
     new_patent_info = {}
     for key in patent_info:
         new_key = IPC_CLC_mapping[key]
@@ -116,31 +148,38 @@ def cal_distribution_similarity(patent_info, paper_info, IPC_CLC_mapping):
 
     return distance
 
-def get_year_sum_data(patent_dict):
+def get_year_history_data(patent_dict, last_year, window):
     """
     计算每年不分col的汇总数据
     """
+    year_list = list(range(last_year - window+1, last_year + 1))
+
     new_dict = {}
     col_list = []
+    uniq_year = []
     for key in patent_dict:
         year, col = key.split('\t')
+        if int(year) not in year_list:
+            continue
+
         if col not in col_list:
             col_list.append(col)
-        if year not in new_dict:
-            new_dict[year] = {}
+        if year not in uniq_year:
+            uniq_year.append(year)
+       
         for group in patent_dict[key]:
             num = patent_dict[key][group]
-            if group not in new_dict[year]:
-                new_dict[year][group] = 0
-            new_dict[year][group] += num
+            if group not in new_dict:
+                new_dict[group] = 0
+            new_dict[group] += num
     #
-    for year in new_dict:
-        for group in new_dict[year]:
-            new_dict[year][group] /= len(col_list)
+    year_num = len(uniq_year)
+    for group in new_dict:
+        new_dict[group] = new_dict[group]/ len(col_list) / year_num
     return new_dict
 
 
-class MergeData(object):
+class MergeDataWithHistoryMean(object):
 
     def process(self, input, par_dict):
         """
@@ -155,23 +194,25 @@ class MergeData(object):
         patent_dict = input['patent_dict']
         yy_dict = input['yy_dict']
 
-        year_patent_dict = get_year_sum_data(patent_dict)
-        year_paper_dict = get_year_sum_data(paper_dict) 
-
         IPC_CLC_mapping = get_dict('english_data/IPC_CLC_mapping')
         out_dir = par_dict.get('out_dir', 'final_res.csv')
         ff = open(out_dir, 'w')
 
-        title_list = ['year', 'col', 'yt', 'yt_A', 'yt_U', 'yt_fenmu', 'size', 'rnd', 'patent3', 'patent1', 'paper3', 'paper1',
-                        'patent_wide', 'patent_deep', 'patent_top_rate', 'paper_wide', 'paper_deep', 'xx', 'match_distance']
+        wide_deep_col = ['wide', 'deep', 'top_rate']
+        title_list = ['year', 'col', 'yt', 'yt_A', 'yt_U', 'yt_fenmu', 'size', 'rnd', 'patent3', 'patent5', 'paper3', 'paper5'] + \
+            ['patent_' + item + '3' for item in wide_deep_col] + \
+                ['paper_' + item + '3' for item in wide_deep_col] + \
+                   ['patent_' + item + '5' for item in wide_deep_col] + \
+                ['paper_' + item + '5' for item in wide_deep_col] + ['match_distance3', 'match_distance5']
+
         ff.write('\t'.join(title_list) + '\n')
         for key in control_dict:
             year, col = key.split('\t')
             if int(year) > 2017 or int(year) < 2008:
                 continue
                 
-            last_year = str(int(year) - 1)
-            last_key = last_year + '\t' + col
+            last_year = int(year) - 1
+            last_key = str(last_year) + '\t' + col
             #
             if last_key in yy_dict and last_key in control_dict and key in yy_dict \
                 and last_key in paper_dict and last_key in patent_dict:
@@ -183,15 +224,24 @@ class MergeData(object):
                 Yt_fenmu = sum(patent_dict[key].values())   # 该year+col分表的专利总数
 
                 ## 计算深度和广度
-                patent_wide_deep = cal_wide_deep(patent_dict[last_key], year_patent_dict[last_year])
-                paper_wide_deep = cal_wide_deep(paper_dict[last_key], year_paper_dict[last_year])
+                year_patent_dict3 = get_year_history_data(patent_dict, last_year, 3)
+                year_paper_dict3 = get_year_history_data(paper_dict, last_year, 3) 
+                year_patent_dict5 = get_year_history_data(patent_dict, last_year, 5)
+                year_paper_dict5 = get_year_history_data(paper_dict, last_year, 5)
+
+
+                patent_wide_deep3 = cal_wide_deep_history(patent_dict, year_patent_dict3, col, last_year, 3)
+                paper_wide_deep3 = cal_wide_deep_history(paper_dict, year_paper_dict3, col, last_year, 3)
+                patent_wide_deep5 = cal_wide_deep_history(patent_dict, year_patent_dict5, col, last_year, 5)
+                paper_wide_deep5 = cal_wide_deep_history(paper_dict, year_paper_dict5, col, last_year, 5)
 
                 ## 计算匹配度
-                match_distance = cal_distribution_similarity(patent_dict[last_key], paper_dict[last_key], IPC_CLC_mapping)
+                match_distance3 = cal_distribution_similarity(patent_dict, paper_dict, col, last_year, 3, IPC_CLC_mapping)
+                match_distance5 = cal_distribution_similarity(patent_dict, paper_dict, col, last_year, 5, IPC_CLC_mapping)
 
                 ## 计算concentration
                 patent_3_dict = trans_data(patent_dict, 3, int(last_year))
-                patent_5_dict = trans_data(patent_dict, 1,  int(last_year))
+                patent_5_dict = trans_data(patent_dict, 5,  int(last_year))
                 
                 paper_3_dict = trans_data(paper_dict, 3, int(last_year))
                 paper_5_dict = trans_data(paper_dict, 1, int(last_year))
@@ -202,7 +252,7 @@ class MergeData(object):
                     x_paper_5 = paper_5_dict[col]
 
                     final_res = [year, col, Yt, num_A, num_U, Yt_fenmu] + zz_control + [x_patent_3, x_patent_5, x_paper_3, x_paper_5] + \
-                        patent_wide_deep + paper_wide_deep + [match_distance]
+                        patent_wide_deep3 + paper_wide_deep3 + patent_wide_deep5 + paper_wide_deep5 + [match_distance3, match_distance5]
                     #print(final_res)
                     ff.write('\t'.join(map(str, final_res)) + '\n')
         ff.close()

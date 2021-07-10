@@ -2,8 +2,8 @@ conf:
     start_dt: '2019-08-30'
     end_dt: '2019-08-30'
     # 自定义
-    metric_dir: '/Users/zhengzhenzhen/zzz/task_projects/logstat/metrics/'
-    patent_dir: '/Users/zhengzhenzhen/zzz/zzz/项目tasks/yezi_paper/step2_clean_data/'
+    metric_dir: '../logstat/metrics/'
+    patent_dir: '../yezi_paper/step2_clean_data/'
 
     
 stream_data:
@@ -25,3 +25,13 @@ merge_english_202102:
 
 stats:
     - BasicStats
+
+## 2021-07-10 特征添加历史3年的均值，历史5年的均值
+add_history_202107:
+    - Common: 'college_dir:college_list.txt'
+    - YY
+    - PatentIPC
+    - PaperCLCWithEnglish
+    - ControlVars
+    - MergeDataWithHistoryMean: 'out_dir:final_res_with_history.csv'
+
