@@ -16,7 +16,7 @@ def get_english_num():
 
 	english_dict = {}
 	english_data_dir = 'english_data/英文发表数据/'
-	year_list = list(range(2008, 2021))
+	year_list = list(range(2004, 2021))
 	year_list = [str(year) for year in year_list]
 	for year in year_list:
 		data_dir = english_data_dir + year + '年各高校数据'
