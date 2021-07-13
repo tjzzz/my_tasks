@@ -32,6 +32,11 @@ def get_english_num():
 				# print(items)
 				eng_group = items[0]
 				count = int(items[1])
+
+				#####
+				if eng_group not in mapping_dict:
+					print(tmp_year, col, eng_group)
+					continue
 				ch_group = mapping_dict[eng_group]
 				key = str(int(year) - 2) + '\t' + col
 				if key not in english_dict:
