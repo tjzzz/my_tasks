@@ -199,11 +199,13 @@ class MergeDataWithHistoryMean(object):
         ff = open(out_dir, 'w')
 
         wide_deep_col = ['wide', 'deep', 'top_rate']
-        title_list = ['year', 'col', 'yt', 'yt_A', 'yt_U', 'yt_fenmu', 'size', 'rnd', 'patent3', 'patent5', 'paper3', 'paper5'] + \
+        title_list = ['year', 'col', 'yt', 'yt_1', 'yt_A', 'yt_U', 'yt_fenmu', 'size', 'rnd', 'patent1', 'patent3', 'patent5', 'paper1', 'paper3', 'paper5'] + \
+            ['patent_' + item + '1' for item in wide_deep_col] + \
+                ['paper_' + item + '1' for item in wide_deep_col] + \
             ['patent_' + item + '3' for item in wide_deep_col] + \
                 ['paper_' + item + '3' for item in wide_deep_col] + \
-                   ['patent_' + item + '5' for item in wide_deep_col] + \
-                ['paper_' + item + '5' for item in wide_deep_col] + ['match_distance3', 'match_distance5']
+            ['patent_' + item + '5' for item in wide_deep_col] + \
+                ['paper_' + item + '5' for item in wide_deep_col] + ['match_distance1', 'match_distance3', 'match_distance5']
 
         ff.write('\t'.join(title_list) + '\n')
         for key in control_dict:
@@ -219,6 +221,9 @@ class MergeDataWithHistoryMean(object):
                 num_A = yy_dict[key]['A']
                 num_U = yy_dict[key]['U']
                 Yt = num_A + num_U     # 该year+col分表的专利合作数
+
+
+                yt_1 = yy_dict[last_key]['A'] + yy_dict[last_key]['U']
                 #yt_1 = yy_dict[last_key]
                 zz_control = control_dict[last_key]
                 Yt_fenmu = sum(patent_dict[key].values())   # 该year+col分表的专利总数
@@ -229,30 +234,36 @@ class MergeDataWithHistoryMean(object):
                 year_patent_dict5 = get_year_history_data(patent_dict, last_year, 5)
                 year_paper_dict5 = get_year_history_data(paper_dict, last_year, 5)
 
-
+                patent_wide_deep1 = cal_wide_deep_history(patent_dict, year_patent_dict3, col, last_year, 1)
+                paper_wide_deep1 = cal_wide_deep_history(paper_dict, year_paper_dict3, col, last_year, 1)
                 patent_wide_deep3 = cal_wide_deep_history(patent_dict, year_patent_dict3, col, last_year, 3)
                 paper_wide_deep3 = cal_wide_deep_history(paper_dict, year_paper_dict3, col, last_year, 3)
                 patent_wide_deep5 = cal_wide_deep_history(patent_dict, year_patent_dict5, col, last_year, 5)
                 paper_wide_deep5 = cal_wide_deep_history(paper_dict, year_paper_dict5, col, last_year, 5)
 
                 ## 计算匹配度
+                match_distance1 = cal_distribution_similarity(patent_dict, paper_dict, col, last_year, 1, IPC_CLC_mapping)
                 match_distance3 = cal_distribution_similarity(patent_dict, paper_dict, col, last_year, 3, IPC_CLC_mapping)
                 match_distance5 = cal_distribution_similarity(patent_dict, paper_dict, col, last_year, 5, IPC_CLC_mapping)
 
                 ## 计算concentration
+                patent_1_dict = trans_data(patent_dict, 1, int(last_year))
                 patent_3_dict = trans_data(patent_dict, 3, int(last_year))
                 patent_5_dict = trans_data(patent_dict, 5,  int(last_year))
                 
+                paper_1_dict = trans_data(paper_dict, 1, int(last_year))
                 paper_3_dict = trans_data(paper_dict, 3, int(last_year))
-                paper_5_dict = trans_data(paper_dict, 1, int(last_year))
+                paper_5_dict = trans_data(paper_dict, 5, int(last_year))
                 if col in patent_5_dict and col in paper_5_dict:
+                    x_patent_1 = patent_1_dict[col]
                     x_patent_3 = patent_3_dict[col]
                     x_patent_5 = patent_5_dict[col]
+                    x_paper_1 = paper_1_dict[col]
                     x_paper_3 = paper_3_dict[col]
                     x_paper_5 = paper_5_dict[col]
 
-                    final_res = [year, col, Yt, num_A, num_U, Yt_fenmu] + zz_control + [x_patent_3, x_patent_5, x_paper_3, x_paper_5] + \
-                        patent_wide_deep3 + paper_wide_deep3 + patent_wide_deep5 + paper_wide_deep5 + [match_distance3, match_distance5]
+                    final_res = [year, col, Yt, yt_1, num_A, num_U, Yt_fenmu] + zz_control + [x_patent_1, x_patent_3, x_patent_5, x_paper_1, x_paper_3, x_paper_5] + \
+                        patent_wide_deep1 + paper_wide_deep1 + patent_wide_deep3 + paper_wide_deep3 + patent_wide_deep5 + paper_wide_deep5 + [match_distance1, match_distance3, match_distance5]
                     #print(final_res)
                     ff.write('\t'.join(map(str, final_res)) + '\n')
         ff.close()
