@@ -60,15 +60,16 @@ def run(ch_name, col, year_list):
     os.system('mkdir -p ' + save_dir)
     
     ## 1. 打开检索
-    capa = DesiredCapabilities.CHROME
-    capa["pageLoadStrategy"] = "none" #懒加载模式，不等待页面加载完毕
+    #capa = DesiredCapabilities.CHROME
+    #capa["pageLoadStrategy"] = "none" #懒加载模式，不等待页面加载完毕
 
-    driver = webdriver.Chrome('../chromedriver_092_4515', desired_capabilities=capa)
-    url = 'http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&search_mode=GeneralSearch&SID=7AEqvcVGon4oH91psNX&preferencesSaved='
+  #driver = webdriver.Chrome('../chromedriver_092_4515', desired_capabilities=capa)
+    driver = webdriver.Chrome('../chromedriver_092_4515')
+    url = 'http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&search_mode=GeneralSearch&SID=E2k366UzlPWpSC7G3X9&preferencesSaved='
 
     driver.get(url)
-    WebDriverWait(driver, 10).until(lambda x:x.find_element_by_xpath('//*[@id="searchCell2"]/span[1]/button'))  # 有检索按钮就可以停止
-    driver.execute_script("window.stop();") #停止当前页面加载，防止input框输入错误
+    #WebDriverWait(driver, 10).until(lambda x:x.find_element_by_xpath('//*[@id="searchCell2"]/span[1]/button'))  # 有检索按钮就可以停止
+    #driver.execute_script("window.stop();") #停止当前页面加载，防止input框输入错误
 
 
     for year in year_list:
@@ -80,14 +81,14 @@ def run(ch_name, col, year_list):
         ## 机构扩展
         #driver.find_element_by_xpath('//*[@id="select2-select1-container"]')  
 
-        ## 年份
-        # driver.find_element_by_xpath('//*[@id="value(input2)"]').clear()
-        # driver.find_element_by_xpath('//*[@id="value(input2)"]').send_keys(year)   
+        # 年份
+        driver.find_element_by_xpath('//*[@id="value(input2)"]').clear()
+        driver.find_element_by_xpath('//*[@id="value(input2)"]').send_keys(year)   
         
         ## 检索
         driver.find_element_by_xpath('//*[@id="searchCell2"]/span[1]/button').click()
-        WebDriverWait(driver, 10).until(lambda x:x.find_element_by_xpath('//*[@id="exportTypeName"]'))  # 总数
-        driver.execute_script("window.stop();") 
+        #WebDriverWait(driver, 10).until(lambda x:x.find_element_by_xpath('//*[@id="exportTypeName"]'))  # 总数
+        #driver.execute_script("window.stop();") 
 
 
         # js="document.getElementById('resetForm').style.display='inline-block'"
@@ -132,14 +133,13 @@ def run(ch_name, col, year_list):
             mm_list = ['//*[@id="exportTypeName"]', 
                     #    '//*[@id="saveToMenu"]/li[3]/a',
                        '//*[@id="numberOfRecordsRange"]',
-                       '//*[@id="excelButton"]']
+                       '//*[@id="exportButton"]']
             
 
             
             for i in range(len(mm_list)):
                 mm = mm_list[i]
                 print(mm)
-                time.sleep(1)
                 #try:
                 driver.find_element_by_xpath(mm).click() 
                 #except:
